@@ -30,7 +30,7 @@ x_train, x_validation, y_train, y_validation = model_selection.train_test_split(
 # subsets for training models
 # subsets for validation
 #Fit the KNN Model
-k_range = range(1,3)#
+k_range = range(1,51)#
 KNN_k_error = []
 for k_value in k_range:
     clf = KNeighborsClassifier(n_neighbors=k_value)
@@ -66,68 +66,11 @@ model.fit(x_train,y_train)
 
 success_example=[]
 failure_example=[]
-y_pred = model.predict(X_test)
+y_pred = model.predict(x_test)
 conf_matrix, accuracy, recall_array, precision_array = func_confusion_matrix(y_test, y_pred)
 
 print(accuracy)
 
-
-'''
-# 6. Apply the Model to the Test Data
-prediction = knn.predict(X_test)
-
-
-# 7. Display the Results
-
-
-#print ('\nAccuracy Score: %.3f' % accuracy_score(Y_test, prediction)
-
-#print ('\n******************', \
-#'\nConfusion Matrix', \
-#'\n*******************'
-#print confusion_matrix(Y_test, prediction)
-
-
-# find the most suitable K
-# k = 1  accuracy = 0.584
-# k = 2  accuracy = 0.531
-# k = 3  accuracy = 0.522
-# k = 4  accuracy = 0.550
-# k = 5  accuracy = 0.525
-'''
-'''
-for i in range(20):
-    k = i + 1
-    knn = KNeighborsClassifier(n_neighbors=k)
-    #knn.fit(traindata, traintarget)
-    knn.fit(X_train,Y_train)
-    
-    # 6. Apply the Model to the Test Data
-    prediction = knn.predict(X_test)
-    print 'When k = %d, Accuracy Score: %.3f' % (k,accuracy_score(Y_test, prediction))
-
-# result
-When k = 1, Accuracy Score: 0.584
-When k = 2, Accuracy Score: 0.531
-When k = 3, Accuracy Score: 0.522
-When k = 4, Accuracy Score: 0.550
-When k = 5, Accuracy Score: 0.525
-When k = 6, Accuracy Score: 0.500
-When k = 7, Accuracy Score: 0.500
-When k = 8, Accuracy Score: 0.497
-When k = 9, Accuracy Score: 0.487
-When k = 10, Accuracy Score: 0.506
-When k = 11, Accuracy Score: 0.522
-When k = 12, Accuracy Score: 0.516
-When k = 13, Accuracy Score: 0.553
-When k = 14, Accuracy Score: 0.544
-When k = 15, Accuracy Score: 0.541
-When k = 16, Accuracy Score: 0.528
-When k = 17, Accuracy Score: 0.531
-When k = 18, Accuracy Score: 0.528
-When k = 19, Accuracy Score: 0.537
-When k = 20, Accuracy Score: 0.531
-'''
 
 
 
