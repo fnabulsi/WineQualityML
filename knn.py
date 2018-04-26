@@ -5,7 +5,6 @@ from sklearn import model_selection
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
 from sklearn import metrics
-from conf_matrix import func_confusion_matrix
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
@@ -20,57 +19,82 @@ wine_features = wine.drop('quality', axis=1) #the features of each wine 1599 row
 
 #split data into training and testing data
 test_size = 0.20 #testing size propotional to wht whole size
-seed = 10 #random number, whatever you like
+seed = 7 #random number, whatever you like
 features_train, x_test, labels_train, y_test = model_selection.train_test_split(wine_features, wine_labels,
-                                                                                            test_size=test_size, random_state=seed)
+                                                                                test_size=test_size, random_state=seed)
 
-x_train, x_validation, y_train, y_validation = model_selection.train_test_split(features_train, labels_train,test_size=test_size, random_state=seed)
-
+x_train, x_validation, y_train, y_validation = model_selection.train_test_split(features_train,
+                                                                                labels_train,test_size=test_size, random_state=seed)
+model_try = KNeighborsClassifier()
+model_try.fit(X=x_train, y=y_train)
+score = model_try.score(x_test,y_test)
+print(score)
 
 # subsets for training models
 # subsets for validation
 #Fit the KNN Model
-k_range = range(1,51)#
+k_range = range(1,300,5)#
 KNN_k_error = []
 for k_value in k_range:
     clf = KNeighborsClassifier(n_neighbors=k_value)
     clf.fit(x_train,y_train)
     error = 1. - clf.score(x_validation, y_validation)
     KNN_k_error.append(error)
+plt.figure(figsize=(10,5))
 plt.plot(k_range, KNN_k_error)
 plt.title('auto KNN')
 plt.xlabel('k values')
 plt.ylabel('error')
-#plt.xticks(c_range)
+plt.xticks(k_range)
 plt.show()
 
 algorithm_types = ['ball_tree', 'kd_tree', 'brute']
 KNN_algorithm_error = []
 for algorithm_value in algorithm_types:
-    clf = KNeighborsClassifier(algorithm=algorithm_value)
+    clf = KNeighborsClassifier(algorithm=algorithm_value,n_neighbors=1)
     clf.fit(x_train,y_train)
     error = 1. - clf.score(x_validation, y_validation)
     KNN_algorithm_error.append(error)
-
 plt.plot(algorithm_types, KNN_algorithm_error)
-plt.title('SVM by Kernels')
-plt.xlabel('Kernel')
+plt.title('KNN algorithm')
+plt.xlabel('algorithm')
 plt.ylabel('error')
 plt.xticks(algorithm_types)
 plt.show()
 
+index_algorithm = 0
+minmum_algorithm = max(KNN_algorithm_error)
+for i,value in enumerate(KNN_algorithm_error):
+    if value <= minmum_algorithm:
+        minmum_algorithm = value
+        index_algorithm=i
+
+index_k = 0
+minmum_k = max(KNN_k_error)
+for i,value in enumerate(KNN_k_error):
+    if value <= minmum_k:
+        minmum_k=value
+        index_k=i
+        
 model = KNeighborsClassifier(n_neighbors=1)
 model.fit(x_train,y_train)
 
-## step 5 evaluate your results with the metrics you have developed in HA3,including accuracy, quantize your results. 
+print(index_algorithm,index_k)
+print(minmum_algorithm,minmum_k)
 
-success_example=[]
-failure_example=[]
-y_pred = model.predict(x_test)
-conf_matrix, accuracy, recall_array, precision_array = func_confusion_matrix(y_test, y_pred)
 
-print(accuracy)
+## step 4 Select the best model and apply it over the testing subset 
+best_algorithm = algorithm_types[index_algorithm]
+best_k = k_range[index_k] # poly had many that were the "best"
+model = KNeighborsClassifier(algorithm=best_algorithm)
+model.fit(X=x_train, y=y_train)
+score = model.score(x_test,y_test)
+print(score)
 
+model = KNeighborsClassifier(n_neighbors=best_k)
+model.fit(X=x_train, y=y_train)
+score = model.score(x_test,y_test)
+print(score)
 
 
 
