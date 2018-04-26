@@ -18,6 +18,7 @@ wineFeatures = wine.drop('quality', axis=1) #features (X)
 testSize = 0.20
 seed = 10
 
+#Normalize all data
 scaler = preprocessing.StandardScaler()
 scaler.fit(wineFeatures)
 wineFeatures = scaler.transform(wineFeatures)
@@ -67,5 +68,62 @@ for i in range(0, len(failedResults)):
     print("Failed input #{}: {}".format(i+1, failedResults[i]))
     if(i + 1 == numDataToDisplay):
         break
+
+#Examine how the hyperparameter C affects error
+cList = []
+for i in range(1,300):
+    c = 0.1 * i
+    cList.append(c)
+
+errorList = []
+for c in cList:
+    logReg =linear_model.LogisticRegression(max_iter=MAX_ITERATIONS, C=c, random_state=seed)
+    logReg.fit(xTrain, yTrain)
+    error = 1 - logReg.score(xValidation, yValidation)
+    errorList.append(error)
+
+minError = min(errorList)
+minIndex = errorList.index(minError)
+minC = cList[minIndex]
+print('The minimum error: {} is created by using a C-Value of: {}.'.format(minError, minC))
+
+
+plt.plot(cList, errorList)
+plt.title('C Value vs. Error')
+plt.xlabel('C-Value')
+plt.ylabel('Error')
+plt.annotate(
+    'Best C: {} Error: {}'.format(minC,minError), xy=(minC, minError),xytext=(minC+5, minError+0.005),
+    arrowprops=dict(facecolor='black', shrink=0.01, width=1, headwidth=5))
+plt.show()
+
+
+#Examine how the hyperparameter MAX_ITERATIONS affects the error
+iterationsList = []
+for i in range(1,100):
+    iteration = 100 * i
+    iterationsList.append(iteration)
+
+errorList = []
+for iteration in iterationsList:
+    logReg =linear_model.LogisticRegression(max_iter=iteration, C=0.2, random_state=seed)
+    logReg.fit(xTrain, yTrain)
+    error = 1 - logReg.score(xValidation, yValidation)
+    errorList.append(error)
+
+minIterError = min(errorList)
+minIterIndex = errorList.index(minIterError)
+minIter = iterationsList[minIterIndex]
+print('The minimum error: {} is created by using a Max Iterations: {}.'.format(minIterError, minIter))
+
+plt.plot(iterationsList, errorList)
+plt.title('Max Iterations vs. Error')
+plt.xlabel('Iterations')
+plt.ylabel('Error')
+plt.annotate(
+    'Best Iterations: {} Error: {}'.format(minIter,minIterError), xy=(minIter, minIterError),xytext=(minC+5, minError+0.005),
+    arrowprops=dict(facecolor='black', shrink=0.01, width=1, headwidth=5))
+plt.show()
+
 
 
