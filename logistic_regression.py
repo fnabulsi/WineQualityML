@@ -31,6 +31,7 @@ featuresTrain, xTest, labelsTrain, yTest = model_selection.train_test_split(
 xTrain, xValidation, yTrain, yValidation = model_selection.train_test_split(
     featuresTrain, labelsTrain, test_size=testSize, random_state=seed)
 
+
 #Run the model
 MAX_ITERATIONS = 100
 logReg = linear_model.LogisticRegression(
@@ -125,5 +126,39 @@ plt.annotate(
     arrowprops=dict(facecolor='black', shrink=0.01, width=1, headwidth=5))
 plt.show()
 
+#Examine how dropping features affects error
+feature_types = ['alcohol','chlorides','citric acid','density','fixed acidity','free sulfur dioxide'
+                 ,'pH','residual sugar','sulphates','total sulfur dioxide','volatile acidity']
+
+x_train = pd.DataFrame(xTrain, columns=feature_types)
+x_validation = pd.DataFrame(xValidation, columns=feature_types)
+
+decision_error = []
+for feature in feature_types:
+    x_train_drop = x_train.drop(feature, axis=1)
+    x_validation_drop = x_validation.drop(feature, axis=1)
+    clf = linear_model.LogisticRegression(max_iter=100, C=0.2, random_state=seed)
+    clf.fit(x_train_drop,yTrain)
+    error = 1. - clf.score(x_validation_drop, yValidation)
+    decision_error.append(error)
+    y_pred = clf.predict(x_validation_drop)
+    print(feature)
+    print ('Accuracy Score: %.3f \n' % accuracy_score(yValidation, y_pred))
+
+minDropError = min(decision_error)
+minDropIndex = decision_error.index(minDropError)
+minDrop = feature_types[minDropIndex]
+print('The minimum error: {} is created by dropping: {}.'.format(minDropError, minDrop))
+
+plt.figure(figsize=(10,5))
+plt.plot(feature_types, decision_error)
+plt.title('Dropped features vs. Error')
+plt.xlabel('Dropped feature')
+plt.ylabel('error')
+plt.xticks(feature_types,fontsize=8)
+plt.annotate(
+    'Best Feature Dropped: {} Error: {}'.format(minDrop,minDropError), xy=(minDropIndex, minDropError),xytext=(minDropIndex-3, minDropError+0.01),
+    arrowprops=dict(facecolor='black', shrink=0.01, width=1, headwidth=5))
+plt.show()    
 
 

@@ -32,7 +32,7 @@ xTrain, xValidation, yTrain, yValidation = model_selection.train_test_split(
     featuresTrain, labelsTrain, test_size=testSize, random_state=seed)
 
 #Run the model
-clf = neural_network.MLPClassifier(hidden_layer_sizes=(10,10,10,10,10,10,10,10,10,10), max_iter=500, verbose=10, alpha=0.0001, solver='sgd', tol=0.0000000001)
+clf = neural_network.MLPClassifier(hidden_layer_sizes=(300,500,30,20,10), max_iter=500, verbose=10, alpha=0.0001, solver='sgd', tol=0.0000000001)
 clf.fit(xTrain, yTrain)
 error = 1 - clf.score(xValidation,yValidation)
 print("Validation set error: {}".format(error))
