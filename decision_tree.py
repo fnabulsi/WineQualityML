@@ -5,7 +5,6 @@ from sklearn import model_selection
 from sklearn import tree
 import matplotlib.pyplot as plt
 from sklearn import metrics
-from conf_matrix import func_confusion_matrix
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
@@ -20,64 +19,124 @@ wine_features = wine.drop('quality', axis=1) #the features of each wine 1599 row
 
 #split data into training and testing data
 test_size = 0.20 #testing size propotional to wht whole size
-seed = 10 #random number, whatever you like
+seed = 7 #random number, whatever you like
 features_train, x_test, labels_train, y_test = model_selection.train_test_split(wine_features, wine_labels,
                                                                                 test_size=test_size, random_state=seed)
 
 x_train, x_validation, y_train, y_validation = model_selection.train_test_split(features_train, labels_train,
                                                                                 test_size=test_size, random_state=seed)
 
-
-# subsets for training models
-# subsets for validation
-#Fit the KNN Model
 decision_tree = tree.DecisionTreeClassifier()
-decision_tree.fit(features_train, labels_train)
-prediction = decision_tree.predict(x_test)
+decision_tree.fit(x_train, y_train)
+score = decision_tree.score(x_validation, y_validation)
+print (score)
 
-y_pred = decision_tree.predict(X_test)
-#conf_matrix, accuracy, recall_array, precision_array = func_confusion_matrix(y_test, y_pred)
-print ('\nAccuracy Score: %.3f' % accuracy_score(Y_test, y_pred))
-#print(accuracy)
-'''
-k_range = range(1,3)#
-KNN_k_error = []
-for k_value in k_range:
-    clf = KNeighborsClassifier(n_neighbors=k_value)
-    clf.fit(x_train,y_train)
-    error = 1. - clf.score(x_validation, y_validation)
-    KNN_k_error.append(error)
-plt.plot(k_range, KNN_k_error)
-plt.title('auto KNN')
-plt.xlabel('k values')
-plt.ylabel('error')
-#plt.xticks(c_range)
-plt.show()
+for name, importance in zip(x_train.columns, decision_tree.feature_importances_):
+    print(name, importance)
+ 
+    
+feature_types = ['alcohol','chlorides','citric acid','density','fixed acidity','free sulfur dioxide'
+                 ,'pH','residual sugar','sulphates','total sulfur dioxide','volatile acidity']
 
-algorithm_types = ['ball_tree', 'kd_tree', 'brute']
-KNN_algorithm_error = []
-for algorithm_value in algorithm_types:
-    clf = KNeighborsClassifier(algorithm=algorithm_value)
-    clf.fit(x_train,y_train)
-    error = 1. - clf.score(x_validation, y_validation)
-    KNN_algorithm_error.append(error)
-
-plt.plot(algorithm_types, KNN_algorithm_error)
+decision_error = []
+for feature in feature_types:
+    x_train_drop = x_train.drop(feature, axis=1)
+    x_validation_drop = x_validation.drop(feature, axis=1)
+    clf = tree.DecisionTreeClassifier()
+    clf.fit(x_train_drop,y_train)
+    error = 1. - clf.score(x_validation_drop, y_validation)
+    decision_error.append(error)
+    y_pred = clf.predict(x_validation_drop)
+    print(feature)
+    print ('Accuracy Score: %.3f \n' % accuracy_score(y_validation, y_pred))
+plt.figure(figsize=(10,5))
+plt.plot(feature_types, decision_error)
 plt.title('SVM by Kernels')
-plt.xlabel('Kernel')
+plt.xlabel('Dropped feature')
 plt.ylabel('error')
-plt.xticks(algorithm_types)
+plt.xticks(feature_types,fontsize=8)
+plt.show()    
+    
+max_depth = [int(x) for x in range(1,200,10)]
+max_depth_error = []
+previous = 1
+best_depth = 0
+for depth in max_depth:
+    clf = tree.DecisionTreeClassifier(max_depth=depth)
+    clf.fit(x_train,y_train)
+    error = 1. - clf.score(x_validation, y_validation)
+    if previous > error:
+        previous = error
+        best_depth = depth
+    max_depth_error.append(error)
+
+plt.plot(max_depth, max_depth_error)
+plt.title('RF max depth')
+plt.xlabel('max depth')
+plt.ylabel('error')
+plt.xticks(max_depth)
 plt.show()
+print(best_depth)
 
-model = KNeighborsClassifier(n_neighbors=1)
-model.fit(x_train,y_train)
+min_samples_split = [2,5,10,25,50,70,90,100]
+min_samples_error = []
+previous = 1
+best_num = 0
+for num in min_samples_split:
+    clf = tree.DecisionTreeClassifier(min_samples_split=num)
+    clf.fit(x_train,y_train)
+    error = 1. - clf.score(x_validation, y_validation)
+    if previous > error:
+        previous = error
+        best_num = num
+    min_samples_error.append(error)
 
-## step 5 evaluate your results with the metrics you have developed in HA3,including accuracy, quantize your results. 
+plt.plot(min_samples_split, min_samples_error)
+plt.title('RF min samples')
+plt.xlabel('min samples')
+plt.ylabel('error')
+plt.xticks(min_samples_split)
+plt.show() 
+print(best_num)
 
-success_example=[]
-failure_example=[]
-y_pred = model.predict(X_test)
-conf_matrix, accuracy, recall_array, precision_array = func_confusion_matrix(y_test, y_pred)
+# Minimum number of samples required at each leaf node
+min_samples_leaf = [1,2,4,10,20,50,70,90,100]
+min_leaf_error = []
+previous = 1
+best_leaf = 0
+for num in min_samples_leaf:
+    clf = tree.DecisionTreeClassifier(min_samples_leaf=num)
+    clf.fit(x_train,y_train)
+    error = 1. - clf.score(x_validation, y_validation)
+    if previous > error:
+        previous = error
+        best_leaf = num
+    min_leaf_error.append(error)
 
-print(accuracy)
-'''
+plt.plot(min_samples_leaf, min_leaf_error)
+plt.title('RF min samples in leaf')
+plt.xlabel('min samples')
+plt.ylabel('error')
+plt.xticks(min_samples_leaf)
+plt.show()
+print(best_leaf)
+
+decision_tree = tree.DecisionTreeClassifier()
+decision_tree.fit(x_train, y_train)
+score = decision_tree.score(x_test,y_test)
+print (score)
+
+best_tree_leaf = tree.DecisionTreeClassifier(min_samples_leaf=best_leaf)
+best_tree_leaf.fit(x_train, y_train)
+score = best_tree_leaf.score(x_test,y_test)
+print (score)
+
+best_tree_split = tree.DecisionTreeClassifier(min_samples_split=best_num)
+best_tree_split.fit(x_train, y_train)
+score = best_tree_split.score(x_test,y_test)
+print (score)
+
+best_tree_depth = tree.DecisionTreeClassifier(max_depth=best_depth)
+best_tree_depth.fit(x_train, y_train)
+score = best_tree_depth.score(x_test,y_test)
+print (score)
