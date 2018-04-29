@@ -7,6 +7,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 from conf_matrix import func_confusion_matrix
+import seaborn as sns
 
 wine = pd.read_csv(
     "/Users/ftnabulsi/cs596/WineQualityML/winequality-red.csv", delimiter=';')
@@ -44,7 +45,9 @@ print("Training set error is:",error)
 #Run the model on the test data
 yPred = logReg.predict(xTest)
 accuracy = accuracy_score(yTest, yPred)
-cMatrix = confusion_matrix(yTest, yPred, labels=wineLabels)
+cMatrix = confusion_matrix(yTest, yPred)
+sns.heatmap(cMatrix, center=True)
+plt.show()
 #cMatrix, accuracy, recall, precision = func_confusion_matrix(yTest, yPred)
 print("Accuracy on test data is:", accuracy)
 print("Confusion Matrix: ")
@@ -102,7 +105,7 @@ plt.show()
 #Examine how the hyperparameter MAX_ITERATIONS affects the error
 iterationsList = []
 for i in range(1,100):
-    iteration = 100 * i
+    iteration = 10 * i
     iterationsList.append(iteration)
 
 errorList = []
@@ -132,6 +135,7 @@ feature_types = ['alcohol','chlorides','citric acid','density','fixed acidity','
 
 x_train = pd.DataFrame(xTrain, columns=feature_types)
 x_validation = pd.DataFrame(xValidation, columns=feature_types)
+x_test = pd.DataFrame(xTest, columns=feature_types)
 
 decision_error = []
 for feature in feature_types:
@@ -159,6 +163,25 @@ plt.xticks(feature_types,fontsize=8)
 plt.annotate(
     'Best Feature Dropped: {} Error: {}'.format(minDrop,minDropError), xy=(minDropIndex, minDropError),xytext=(minDropIndex-3, minDropError+0.01),
     arrowprops=dict(facecolor='black', shrink=0.01, width=1, headwidth=5))
-plt.show()    
+plt.show()   
+
+
+#Optimal test
+feature = 'total sulfur dioxide'
+logReg = linear_model.LogisticRegression(max_iter=100, C=0.2, random_state=seed)
+x_train_drop = x_train.drop(feature, axis=1)
+x_validation_drop = x_validation.drop(feature, axis=1)
+x_test_drop = x_test.drop(feature, axis=1)
+logReg.fit(x_train_drop, yTrain)
+validationError = 1 - logReg.score(x_validation_drop, yValidation)
+yPred = logReg.predict(x_test_drop)
+testAccuracy = accuracy_score(yTest, yPred)
+cMatrix = confusion_matrix(yTest, yPred)
+print('Validation error: {}'.format(validationError))
+print('Test Accuracy: {}'.format(testAccuracy))
+print('Confusion Matrix: ')
+print(cMatrix)
+sns.heatmap(cMatrix, center=True)
+plt.show()
 
 
