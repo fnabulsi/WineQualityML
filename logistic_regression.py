@@ -181,6 +181,7 @@ print('Validation error: {}'.format(validationError))
 print('Test Accuracy: {}'.format(testAccuracy))
 print('Confusion Matrix: ')
 print(cMatrix)
+print(yPred)
 sns.heatmap(cMatrix, center=True)
 plt.show()
 
