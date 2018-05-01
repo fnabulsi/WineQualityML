@@ -53,6 +53,7 @@ print("Accuracy on test data is:", accuracy)
 print("Confusion Matrix: ")
 print(cMatrix)
 
+#Display 5 successful results and 5 failed results
 numDataToDisplay = 5
 successResults = []
 failedResults = []
@@ -79,6 +80,7 @@ for i in range(1,300):
     c = 0.1 * i
     cList.append(c)
 
+#Loop through all possible C values and get error
 errorList = []
 for c in cList:
     logReg =linear_model.LogisticRegression(max_iter=MAX_ITERATIONS, C=c, random_state=seed)
@@ -108,6 +110,7 @@ for i in range(1,100):
     iteration = 10 * i
     iterationsList.append(iteration)
 
+#Loop through all values of MAX_ITER and append error
 errorList = []
 for iteration in iterationsList:
     logReg =linear_model.LogisticRegression(max_iter=iteration, C=0.2, random_state=seed)
@@ -137,6 +140,7 @@ x_train = pd.DataFrame(xTrain, columns=feature_types)
 x_validation = pd.DataFrame(xValidation, columns=feature_types)
 x_test = pd.DataFrame(xTest, columns=feature_types)
 
+#Loop through each feature and fit the model without it. Append error
 decision_error = []
 for feature in feature_types:
     x_train_drop = x_train.drop(feature, axis=1)

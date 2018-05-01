@@ -19,10 +19,10 @@ wineFeatures = wine.drop('quality', axis=1) #features (X)
 testSize = 0.20
 seed = 10
 
-# #Normalize all data
-# scaler = preprocessing.StandardScaler()
-# scaler.fit(wineFeatures)
-# wineFeatures = scaler.transform(wineFeatures)
+#Normalize all data
+scaler = preprocessing.StandardScaler()
+scaler.fit(wineFeatures)
+wineFeatures = scaler.transform(wineFeatures)
 
 #Split data into training and testing data
 featuresTrain, xTest, labelsTrain, yTest = model_selection.train_test_split(
@@ -45,25 +45,26 @@ print("Test set accuracy: {}".format(accuracy))
 cMatrix = confusion_matrix(yPred, yTest)
 print(cMatrix)
 
-# #Examine how the number of layers affects the error of the model
-# MAX_LAYERS = 50
-# layers = []
-# errors = []
-# for i in range(1,50):
-#     layers.append(i)
-#     l = [50] * i
-#     t = tuple(l)
-#     clf = neural_network.MLPClassifier(hidden_layer_sizes=t, max_iter=500, verbose=10, alpha=0.01, tol=0.00000001)
-#     clf.fit(xTrain, yTrain)
-#     error = 1 - clf.score(xValidation, yValidation)
-#     errors.append(error)
+#Examine how the number of layers affects the error of the model
+MAX_LAYERS = 50
+layers = []
+errors = []
+#Loop through all numbers of layers and get error for each
+for i in range(1,50):
+    layers.append(i)
+    l = [50] * i
+    t = tuple(l)
+    clf = neural_network.MLPClassifier(hidden_layer_sizes=t, max_iter=500, verbose=10, alpha=0.01, tol=0.00000001)
+    clf.fit(xTrain, yTrain)
+    error = 1 - clf.score(xValidation, yValidation)
+    errors.append(error)
 
-# plt.plot(layers, errors)
-# plt.title('Hidden Layers vs. Error')
-# plt.xlabel('Number of Hidden Layers')
-# plt.ylabel('Error')
-# plt.xticks(layers,fontsize=8)
-# plt.show()
+plt.plot(layers, errors)
+plt.title('Hidden Layers vs. Error')
+plt.xlabel('Number of Hidden Layers')
+plt.ylabel('Error')
+plt.xticks(layers,fontsize=8)
+plt.show()
 
 #Examine how the learning rate affects the error of the model.
 errors = []
@@ -74,12 +75,14 @@ for i in range(1,100):
     alpha = 0.0002 * i
     alphas.append(alpha)
 
+#Loop through all alphas and get error
 for a in alphas:
     clf = neural_network.MLPClassifier(hidden_layer_sizes=(50,50), max_iter=500, alpha=a, verbose=10, tol=0.0000001)
     clf.fit(xTrain, yTrain)
     error = 1 - clf.score(xValidation, yValidation)
     errors.append(error)
 
+#Get all minimums
 minError = min(errors)
 minIndex = errors.index(minError)
 minAlpha = alphas[minIndex]
@@ -101,6 +104,7 @@ x_train = pd.DataFrame(xTrain, columns=feature_types)
 x_validation = pd.DataFrame(xValidation, columns=feature_types)
 x_test = pd.DataFrame(xTest, columns=feature_types)
 
+#Loop through all features and drop each one
 decision_error = []
 for feature in feature_types:
     x_train_drop = x_train.drop(feature, axis=1)
@@ -113,6 +117,7 @@ for feature in feature_types:
     print(feature)
     print ('Accuracy Score: %.3f \n' % accuracy_score(yValidation, y_pred))
 
+#Get all minimums
 minDropError = min(decision_error)
 minDropIndex = decision_error.index(minDropError)
 minDrop = feature_types[minDropIndex]
